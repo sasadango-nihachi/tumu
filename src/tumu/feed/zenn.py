@@ -1,58 +1,46 @@
-"""Zenn用フィードパーサー"""
+"""Zenn用フィードパーサー（共通モデル版）"""
 import feedparser
-import warnings
 from datetime import datetime
-from typing import List, Dict, Optional
-from dataclasses import dataclass
-
-@dataclass
-class ZennArticle:
-    """Zenn記事のデータクラス"""
-    title: str
-    summary: str
-    url: str
-    published_date: str
-    image_url: Optional[str] = None
-    ogp_image_url: Optional[str] = None
-    
-    @property
-    def short_summary(self) -> str:
-        """150文字に省略されたサマリー"""
-        return self.summary[:150] + "..." if len(self.summary) > 150 else self.summary
-    
-    def to_dict(self) -> Dict[str, str]:
-        """辞書形式に変換（後方互換性のため）"""
-        return {
-            "title": self.title,
-            "summary": self.short_summary,
-            "imageUrl": str(self.image_url) if self.image_url else "",
-            "url": self.url,
-            "publishedDate": self.published_date
-        }
+from typing import List, Optional
+try:
+    from ..core.models import Article, FeedResult
+except ImportError:
+    # 直接実行時用
+    import sys
+    from pathlib import Path
+    sys.path.append(str(Path(__file__).parent.parent))
+    from core.models import Article, FeedResult
 
 
-class ZennFeedParser:
+
+class ZennParser:
     """Zennフィードパーサー"""
     
+    SOURCE_NAME = "zenn"
+    BASE_URL = "https://zenn.dev"
+    
     @staticmethod
-    def parse_feed(url: str) -> List[ZennArticle]:
+    def parse_feed(url: str) -> FeedResult:
         """
-        フィードをパースしてZennArticleのリストを返す
+        フィードをパースしてFeedResultを返す
         
         Args:
             url: フィードのURL
             
         Returns:
-            List[ZennArticle]: パースされた記事のリスト
+            FeedResult: パースされた結果
         """
         f = feedparser.parse(url)
         articles = []
         
+        # フィード情報
+        feed_title = f.feed.get('title', 'Zenn')
+        
         for entry in f.entries:
             # 基本情報の取得
             title = entry.get('title', '')
-            summary = entry.get('summary', '')
             article_url = entry.get('link', '')
+            summary = entry.get('summary', '')
             
             # 日付のパース
             pub_time = datetime.now()
@@ -65,51 +53,37 @@ class ZennFeedParser:
             
             # 画像URLの取得
             image_url = None
-            ogp_image_url = None
-            
             for link in entry.get('links', []):
                 link_type = link.get('type', '')
-                link_rel = link.get('rel', '')
-                
-                # 通常の画像URL
-                if link_type.startswith('image/') and not image_url:
+                if link_type.startswith('image/'):
                     image_url = link.get('href')
-                
-                # OGP画像URL
-                if link_rel == 'enclosure' and link_type.startswith('image/'):
-                    ogp_image_url = link.get('href')
+                    break
             
-            article = ZennArticle(
+            # Zennの場合、著者やタグ情報は基本的にフィードに含まれない
+            article = Article(
                 title=title,
-                summary=summary,
                 url=article_url,
                 published_date=formatted_date,
-                image_url=image_url,
-                ogp_image_url=ogp_image_url
+                source=ZennParser.SOURCE_NAME,
+                summary=summary,
+                author=None,  # Zennのフィードには著者情報がない
+                tags=None,    # Zennのフィードにはタグ情報がない
+                image_url=image_url
             )
             
             articles.append(article)
         
-        return articles
-    
-    @staticmethod
-    def parse_feed_as_dict(url: str) -> List[Dict[str, str]]:
-        """
-        フィードをパースして辞書のリストを返す（後方互換性）
-        
-        Args:
-            url: フィードのURL
-            
-        Returns:
-            List[Dict[str, str]]: パースされた記事の辞書リスト
-        """
-        articles = ZennFeedParser.parse_feed(url)
-        return [article.to_dict() for article in articles]
+        return FeedResult(
+            articles=articles,
+            feed_title=feed_title,
+            feed_url=url,
+            fetched_at=datetime.now()
+        )
 
 
 # 便利な関数（高レベルAPI）
 
-def get_feed(topic: Optional[str] = None, all_pages: bool = False) -> List[ZennArticle]:
+def get_feed(topic: Optional[str] = None, all_pages: bool = False) -> FeedResult:
     """
     Zennのフィードを取得
     
@@ -120,43 +94,25 @@ def get_feed(topic: Optional[str] = None, all_pages: bool = False) -> List[ZennA
                ※全体フィードでは利用できません
         
     Returns:
-        List[ZennArticle]: 記事のリスト
+        FeedResult: フィード取得結果
         
     Examples:
-        >>> articles = get_feed()  # 全体フィード
-        >>> articles = get_feed("python")  # Pythonトピック（最新のみ）
-        >>> articles = get_feed("python", all_pages=True)  # Pythonトピック（全件）
+        >>> result = get_feed()  # 全体フィード
+        >>> result = get_feed("python")  # Pythonトピック
+        >>> result = get_feed("python", all_pages=True)  # Pythonトピック全件
     """
     if topic is None:
-        url = "https://zenn.dev/feed"
-        if all_pages:
-            warnings.warn(
-                "all_pages=True は全体フィードでは利用できません。"
-                "トピックを指定してください。", 
-                UserWarning
-            )
+        url = f"{ZennParser.BASE_URL}/feed"
+        # 全体フィードではall_pagesは無効
     else:
-        url = f"https://zenn.dev/topics/{topic}/feed"
+        url = f"{ZennParser.BASE_URL}/topics/{topic}/feed"
         if all_pages:
             url += "?all=1"
     
-    return ZennFeedParser.parse_feed(url)
+    return ZennParser.parse_feed(url)
 
 
-def get_feed_by_url(url: str) -> List[ZennArticle]:
-    """
-    カスタムURLからフィードを取得
-    
-    Args:
-        url: フィードのURL
-        
-    Returns:
-        List[ZennArticle]: 記事のリスト
-    """
-    return ZennFeedParser.parse_feed(url)
-
-
-def get_user_feed(username: str, all_pages: bool = False) -> List[ZennArticle]:
+def get_user_feed(username: str, all_pages: bool = False) -> FeedResult:
     """
     特定ユーザーのフィードを取得
     
@@ -165,22 +121,23 @@ def get_user_feed(username: str, all_pages: bool = False) -> List[ZennArticle]:
         all_pages: Trueの場合、全ページを取得（?all=1を付与）
         
     Returns:
-        List[ZennArticle]: 記事のリスト
+        FeedResult: フィード取得結果
         
     Examples:
-        >>> articles = get_user_feed("churadata")  # 最新のみ
-        >>> articles = get_user_feed("churadata", all_pages=True)  # 全件
+        >>> result = get_user_feed("churadata")  # 最新のみ
+        >>> result = get_user_feed("churadata", all_pages=True)  # 全件
     """
-    url = f"https://zenn.dev/p/{username}/feed"
+    url = f"{ZennParser.BASE_URL}/p/{username}/feed"
     
     if all_pages:
         url += "?all=1"
     
-    return ZennFeedParser.parse_feed(url)
+    return ZennParser.parse_feed(url)
 
 
-# 後方互換性のための関数
-def zen_feed_data_get(url: str) -> List[Dict[str, str]]:
+# 後方互換性のための関数とクラス
+
+def zen_feed_data_get(url: str) -> List[dict]:
     """
     元の関数と同じインターフェース（後方互換性）
     
@@ -188,45 +145,50 @@ def zen_feed_data_get(url: str) -> List[Dict[str, str]]:
         url: フィードのURL
         
     Returns:
-        List[Dict[str, str]]: 記事の辞書リスト
+        List[dict]: 記事の辞書リスト
     """
-    return ZennFeedParser.parse_feed_as_dict(url)
+    result = ZennParser.parse_feed(url)
+    return [article.to_dict() for article in result.articles]
 
 
+# よく使うトピック
+class PopularTopics:
+    """Zennでよく使われるトピック"""
+    PYTHON = "python"
+    JAVASCRIPT = "javascript"
+    TYPESCRIPT = "typescript"
+    GO = "go"
+    RUST = "rust"
+    AWS = "aws"
+    GCP = "googlecloud"
+    DOCKER = "docker"
+    KUBERNETES = "kubernetes"
+    REACT = "react"
+    VUE = "vue"
+    NEXTJS = "nextjs"
+    AI = "ai"
+    MACHINE_LEARNING = "機械学習"
+    DATA_ENGINEER = "データエンジニア"
 
 
 if __name__ == "__main__":
-    # 使用例1: 元のコードと同じ使い方
-    print("=== 後方互換性の確認 ===")
-    ZENN_DATAENGINEER_URL = "https://zenn.dev/topics/データエンジニア/feed"
-    result = zen_feed_data_get(ZENN_DATAENGINEER_URL)
-    print(f"データエンジニア記事数: {len(result)}")
-    if result:
-        print(f"最初の記事: {result[0]['title']}")
+    # 使用例1: 統一されたインターフェース
+    print("=== 統一されたインターフェースでの使用 ===")
     
-    # 使用例2: トピックを引数で指定
-    print("\n=== トピックを引数で指定 ===")
-    articles = get_feed("python")
-    print(f"Python記事数: {len(articles)}")
-    if articles:
-        print(f"最初の記事: {articles[0].title}")
+    # Zennの場合
+    zenn_result = get_feed("python")
+    print(f"Zenn Python記事数: {zenn_result.total_count}")
     
-    # 使用例3: 日本語トピック
-    print("\n=== 日本語トピック ===")
-    ml_articles = get_feed("機械学習")
-    print(f"機械学習記事数: {len(ml_articles)}")
+    # 記事の詳細（共通フォーマット）
+    if zenn_result.articles:
+        article = zenn_result.articles[0]
+        print(f"\n記事情報:")
+        print(f"- タイトル: {article.title}")
+        print(f"- URL: {article.url}")
+        print(f"- ソース: {article.source}")
+        print(f"- 日付: {article.published_date}")
+        print(f"- 要約: {article.short_summary}")
     
-    # 使用例4: 全体フィード（引数なし）
-    print("\n=== 全体フィード ===")
-    all_feed_articles = get_feed()
-    print(f"全体記事数（最新）: {len(all_feed_articles)}")
-    all_feed_articles_all = get_feed(all_pages=True)
-    print(f"全体記事数（全件）: {len(all_feed_articles_all)}")
-    
-    # 使用例5: 特定ユーザー
-    print("\n=== 特定ユーザーのフィード ===")
-    user_articles = get_user_feed("churadata")
-    print(f"churadataさんの記事数（最新）: {len(user_articles)}")
-    user_articles_all = get_user_feed("churadata", all_pages=True)
-    print(f"churadataさんの記事数（全件）: {len(user_articles_all)}")
-    
+    # 辞書形式での取得
+    result_dict = zenn_result.to_dict()
+    print(f"\n辞書形式: {result_dict['feedTitle']}, {result_dict['totalCount']}件")
