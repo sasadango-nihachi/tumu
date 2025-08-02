@@ -4,3 +4,4 @@
 ## 対応RSS FEED
 - Zenn
 - Classmethod(DevelopersIO)
+- ggen
