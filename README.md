@@ -8,3 +8,4 @@
 - ggen
 - qiita 
 - googlecloud blog
+- aws blog
