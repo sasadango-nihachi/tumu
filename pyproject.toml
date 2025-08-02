@@ -12,3 +12,8 @@ dependencies = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/tumu"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+]
