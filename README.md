@@ -6,3 +6,4 @@
 - Classmethod(DevelopersIO)
 - ggen
 - qiita 
+- googlecloud blog
