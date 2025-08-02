@@ -17,3 +17,10 @@ packages = ["src/tumu"]
 dev = [
     "pytest>=8.4.1",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = [
+    # feedparserの警告を無視
+    "ignore::DeprecationWarning:feedparser.*",
+]

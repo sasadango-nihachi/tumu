@@ -1,0 +1,11 @@
+# テスト実行
+uv run pytest tests/test_feeds.py
+
+# 詳細表示
+uv run pytest tests/test_feeds.py -v
+
+# 特定のテストのみ
+uv run pytest tests/test_feeds.py::test_zenn_feed -v
+
+# 出力を表示
+uv run pytest tests/test_feeds.py -s
