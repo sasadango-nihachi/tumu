@@ -28,4 +28,6 @@ testpaths = ["tests"]
 filterwarnings = [
     # feedparserの警告を無視
     "ignore::DeprecationWarning:feedparser.*",
+    # pandas_datareaderの警告を無視
+    "ignore::DeprecationWarning:pandas_datareader.*",
 ]
