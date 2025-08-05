@@ -6,7 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 import pytest
-from tumu.feed import zenn, classmethod, ggen, qiita, googlecloud, aws, huggingface, deepmind, openai 
+from tumu.feed import zenn, classmethod, ggen, qiita, googlecloud, aws, huggingface, deepmind, openai, googleai 
 
 
 def test_zenn_feed():
@@ -85,6 +85,11 @@ def test_openai_feed():
     assert result.total_count > 0
 
 
+def test_googleai_feed():
+    """deepmindフィードの基本テスト"""
+    result = googleai.get_feed()
+    assert result.total_count > 0
+
 
 def test_article_structure():
     """記事の構造が正しいかテスト"""
@@ -117,6 +122,7 @@ def test_all_feeds_work():
         ("huggingface", lambda: huggingface.get_feed()),
         ("deepmind", lambda: deepmind.get_feed()),
         ("openai", lambda: openai.get_feed()),
+        ("googleai", lambda: googleai.get_feed()),
         
     ]
     
