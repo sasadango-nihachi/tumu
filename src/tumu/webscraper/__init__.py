@@ -1,4 +1,4 @@
 """フィードパーサーモジュール"""
-from tumu.webscraper import anthropicnews 
+from tumu.webscraper import anthropicnews, kabutan 
 
-__all__ = ["anthropicnews"]
+__all__ = ["anthropicnews","kabutan"]
