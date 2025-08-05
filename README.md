@@ -13,6 +13,10 @@
 - qiita 
 - googlecloud blog
 - aws blog
+- huggingface blog
+- openai blog
+- deepmind blog
+- google ai blog
 
 
 
