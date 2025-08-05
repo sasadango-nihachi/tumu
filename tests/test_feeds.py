@@ -6,7 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 import pytest
-from tumu.feed import zenn, classmethod, ggen, qiita, googlecloud, aws
+from tumu.feed import zenn, classmethod, ggen, qiita, googlecloud, aws, huggingface
 
 
 def test_zenn_feed():
@@ -66,6 +66,12 @@ def test_aws_feed():
     assert ja_result.total_count > 0
     assert all(a.source == "aws_ja" for a in ja_result.articles)
 
+def test_huggingface_feed():
+    """huggingfaceフィードの基本テスト"""
+    # 日本語（デフォルト）
+    result = huggingface.get_feed()
+    assert result.total_count > 0
+
 
 def test_article_structure():
     """記事の構造が正しいかテスト"""
@@ -95,6 +101,7 @@ def test_all_feeds_work():
         ("Qiita", lambda: qiita.get_feed()),
         ("Google Cloud", lambda: googlecloud.get_feed()),
         ("AWS", lambda: aws.get_feed()),
+        ("huggingface", lambda: huggingface.get_feed()),
     ]
     
     for name, get_feed in feeds:
