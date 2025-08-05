@@ -4,6 +4,7 @@
 ## 取得データ
 - RSS
 - 株価（日本）
+- webscraper(anthropic news)
 
 ## 対応RSS
 - Zenn
@@ -12,6 +13,8 @@
 - qiita 
 - googlecloud blog
 - aws blog
+
+
 
 ## pipして内部で利用
 ```
