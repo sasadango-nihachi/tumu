@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import time
 import random 
-from datetime import datetime
 
 
 def scrape_kabutan_volume_ranking(url):
@@ -126,18 +125,27 @@ def scrape_kabutan_volume_ranking(url):
     
     return data
 
-def stock_volume_get():
-    today = datetime.now().strftime('%Y%m%d')
-    csv_filename = f'kabutan_volume_ranking_{today}.csv'
+def stock_volume_get(page=40):
+    """
+    株探の出来高ランキングページからデータを取得し、CSVファイルに保存する関数
+    1ページで15件だから、デフォルト40で600銘柄くらい
+
+    Args:
+        page (int): page数
+    
+    Returns:
+        pandas.DataFrame: 取得したデータのデータフレーム
+    """
 
     stock_volumes = []
-    for i in range(1,80):
-        url = f"https://kabutan.jp/warning/volume_ranking?market=0&capitalization=-1&dispmode=normal&stc=&stm=0&page={i}"
-        print(url)
-        tmp_data = scrape_kabutan_volume_ranking(url)
-        stock_volumes += tmp_data
-        # 負荷をかけないように0.5から2.0秒のrandomでキックする
-        time.sleep(float(f"{random.uniform(0.5, 2.0):.1f}"))
+    for i in range(0,page+1):
+        if i not in (0,page+1):
+            url = f"https://kabutan.jp/warning/volume_ranking?market=0&capitalization=-1&dispmode=normal&stc=&stm=0&page={i}"
+            print(url)
+            tmp_data = scrape_kabutan_volume_ranking(url)
+            stock_volumes += tmp_data
+            # 負荷をかけないように0.5から2.0秒のrandomでキックする
+            time.sleep(float(f"{random.uniform(0.5, 1.0):.1f}"))
     column_names = ['コード', '銘柄名', '市場', '株価', '前日比(値)', '前日比(%)', '出来高', 'PER', 'PBR', '利回り']
     return pd.DataFrame(stock_volumes, columns=column_names)
 
