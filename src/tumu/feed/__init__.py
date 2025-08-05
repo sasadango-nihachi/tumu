@@ -1,7 +1,7 @@
 """フィードパーサーモジュール"""
-from tumu.feed import zenn, classmethod, ggen, qiita, googlecloud, aws, huggingface,deepmind 
+from tumu.feed import zenn, classmethod, ggen, qiita, googlecloud, aws, huggingface,deepmind, openai
 
-__all__ = ["zenn", "classmethod", "ggen", "qiita", "googlecloud","aws","huggingface","deepmind"]
+__all__ = ["zenn", "classmethod", "ggen", "qiita", "googlecloud","aws","huggingface","deepmind","openai"]
 # これらが公開APIであるという宣言
 
 # ここがあると下記のように簡潔になる、忘れがちなのでメモしておく
