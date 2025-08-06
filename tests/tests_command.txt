@@ -26,3 +26,7 @@ uv run pytest tests/test_stock_jp.py::test_multiple_stocks -v
 
 # 出力を表示しながら実行
 uv run pytest tests/test_stock_jp.py -s -v
+
+
+# webscraper
+uv run pytest tests/test_webscraper.py -v
