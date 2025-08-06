@@ -10,6 +10,8 @@ import glob
 # .envファイルを読み込み
 load_dotenv()
 
+# TODO どのくらいの返却が必要か悩ましい、どの程度扱える状態がいいか精査が必要
+
 def search_by_security_code(api_key: str, security_code: str, date: str) -> pd.DataFrame:
     """
     証券コードと日付で有価証券報告書を検索
