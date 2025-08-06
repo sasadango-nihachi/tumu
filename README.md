@@ -1,22 +1,24 @@
 # tumu「集む」
-- 必要なデータを収集しやすくして、個人的に使いやすくするのが目的
+- これを作る目的として、何か作るたびに何度も実装してるデータ取得系の処理をまとめたい
 
 ## 取得データ
 - RSS
+    - Zenn
+    - Classmethod(DevelopersIO)
+    - ggen
+    - qiita 
+    - googlecloud blog
+    - aws blog
+    - huggingface blog
+    - openai blog
+    - deepmind blog
+    - google ai blog
 - 株価（日本）
-- webscraper(anthropic news)
-
-## 対応RSS
-- Zenn
-- Classmethod(DevelopersIO)
-- ggen
-- qiita 
-- googlecloud blog
-- aws blog
-- huggingface blog
-- openai blog
-- deepmind blog
-- google ai blog
+    - 日本株のOHLC
+    - 日本株の一覧取得
+- webscraper
+    - anthropic news 
+    - kabutan  
 
 
 
