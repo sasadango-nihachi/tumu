@@ -16,12 +16,12 @@
 - 株価（日本）
     - 日本株のOHLC
     - 日本株の一覧取得
+    - EDINET 
+        - APIキーが必要なので要発行
 - webscraper
     - anthropic news 
     - kabutan  
-- api 
-    - EDINET 
-        - APIキーが必要なので要発行
+    
 
 
 ## pipして内部で利用
