@@ -19,7 +19,9 @@
 - webscraper
     - anthropic news 
     - kabutan  
-
+- api 
+    - EDINET 
+        - APIキーが必要なので要発行
 
 
 ## pipして内部で利用
