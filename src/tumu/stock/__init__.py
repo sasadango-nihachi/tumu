@@ -1,5 +1,5 @@
 # src/tumu/stock/__init__.py
 """株価データ取得モジュール"""
-from tumu.stock import stock_jp, edinet
+from tumu.stock import stock_jp, edinet,kabutan
 
-__all__ = ["stock_jp","edinet"]
+__all__ = ["stock_jp","edinet","kabutan"]
