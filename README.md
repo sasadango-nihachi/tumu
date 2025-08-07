@@ -18,9 +18,10 @@
     - 日本株の一覧取得
     - EDINET 
         - APIキーが必要なので要発行
+    - kabutan  
 - webscraper
     - anthropic news 
-    - kabutan  
+
     
 
 
