@@ -5,7 +5,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from unittest.mock import Mock, patch, call
 import pandas as pd
-from tumu.webscraper.kabutan import (
+from tumu.stock.kabutan import (
     scrape_kabutan_volume_ranking,
     stock_volume_get
 )
